@@ -100,5 +100,13 @@ public class UserController {
         }
         return returnValue;
     }
+
+    @GetMapping(path = "/{id}/addresses/{addressId}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public AddressesRest getSingleAddress(@PathVariable String id, @PathVariable String addressId){
+        AddressesRest addressesRest = new AddressesRest();
+        ModelMapper modelMapper = new ModelMapper();
+        AddressDto addressDto = addressService.getAddress(id, addressId);
+        return modelMapper.map(addressDto, AddressesRest.class);
+    }
 }
 
