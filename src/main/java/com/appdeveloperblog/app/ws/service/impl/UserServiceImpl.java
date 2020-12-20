@@ -38,17 +38,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto user) {
+
         if (userRepository.findByEmail(user.getEmail()) != null) {
-            throw new RuntimeException("Record already exists");
+            throw new UserServiceException("Record already exists");
         }
 
-        for(int i = 0; i< user.getAddresses().size(); i++){
-            AddressDto address = user.getAddresses().get(i);
-            address.setUserDetails(user);
-            address.setAddressId(utils.generateAddressId(30));
-            user.getAddresses().set(i, address);
-        }
+        if(user.getAddresses() != null){
+            for(int i = 0; i< user.getAddresses().size(); i++){
+                AddressDto address = user.getAddresses().get(i);
+                address.setUserDetails(user);
+                address.setAddressId(utils.generateAddressId(30));
+                user.getAddresses().set(i, address);
+            }
 
+        }
         ModelMapper modelMapper = new ModelMapper();
         //  BeanUtils.copyProperties(user, userEntity);
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
@@ -56,9 +59,8 @@ public class UserServiceImpl implements UserService {
         String publicUserId = utils.generateUserId(30);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setUserId(publicUserId);
-
         UserEntity storedUserDetails = userRepository.save(userEntity);
-        UserDto storedUser = new UserDto();
+        UserDto storedUser ;
 //        BeanUtils.copyProperties(storedUserDetails, storedUser);
         storedUser = modelMapper.map(storedUserDetails, UserDto.class);
         return storedUser;
@@ -112,12 +114,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUserList(int page, int limit) {
-        Pageable pageableRequest = PageRequest.of(page, limit);
         if (page > 0) page = page - 1;
+        Pageable pageableRequest = PageRequest.of(page, limit);
+
         Page<UserEntity> userEntitiesPages = userRepository.findAll(pageableRequest);
         List<UserEntity> userEntityList = userEntitiesPages.getContent();
         List<UserDto> userDtoList = new ArrayList<>();
-        UserDto userDto = new UserDto();
+        UserDto userDto;
         for (UserEntity userEntity : userEntityList) {
             userDto = new UserDto();
             BeanUtils.copyProperties(userEntity, userDto);

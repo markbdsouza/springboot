@@ -11,6 +11,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,7 +56,7 @@ public class UserController {
     @PostMapping(consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws UserServiceException {
-        UserRest returnValue = new UserRest();
+        UserRest returnValue ;
         if (userDetails.getFirstName().isEmpty())
             throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 //        UserDto userDto = new UserDto();
@@ -90,23 +93,52 @@ public class UserController {
     }
 
     @GetMapping(path = "/{id}/addresses", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public List<AddressesRest> getAddresses(@PathVariable String id) {
+    public CollectionModel<AddressesRest> getAddresses(@PathVariable String id) {
         List<AddressesRest> returnValue = new ArrayList<>();
         List<AddressDto> addressDtoList = addressService.getAddresses(id);
         if(addressDtoList !=null && !addressDtoList.isEmpty()){
             ModelMapper modelMapper = new ModelMapper();
             Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
             returnValue = modelMapper.map(addressDtoList, listType);
+            for(AddressesRest addressesRest: returnValue){
+                Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+                        .getSingleAddress(id, addressesRest.getAddressId()))
+                        .withSelfRel();
+                addressesRest.add(selfLink);
+            }
         }
-        return returnValue;
+        Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
+        Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddresses(id))
+                .withSelfRel();
+        return CollectionModel.of(returnValue, userLink,selfLink);
     }
 
     @GetMapping(path = "/{id}/addresses/{addressId}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public AddressesRest getSingleAddress(@PathVariable String id, @PathVariable String addressId){
-        AddressesRest addressesRest = new AddressesRest();
+        AddressesRest addressesRest;
         ModelMapper modelMapper = new ModelMapper();
         AddressDto addressDto = addressService.getAddress(id, addressId);
-        return modelMapper.map(addressDto, AddressesRest.class);
+
+        addressesRest= modelMapper.map(addressDto, AddressesRest.class);
+        //create links for HATEOS support
+        Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
+        Link addressLink =WebMvcLinkBuilder.linkTo(UserController.class)
+                .slash(id)
+                .slash("addresses")
+                .withRel("addresses");
+        Link addressLink2 =WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddresses(addressId))
+                .withRel("addresses");
+        Link selfLink = WebMvcLinkBuilder.linkTo(UserController.class)
+                .slash(id)
+                .slash("addresses")
+                .slash(addressId)
+                .withSelfRel();
+        addressesRest.add(userLink);
+        addressesRest.add(addressLink);
+        addressesRest.add(selfLink);
+
+        // return EntityModel.of(addressesRest, Arrays.asList(userLink, addressLink, selfLink));
+        return addressesRest;
     }
 }
 
