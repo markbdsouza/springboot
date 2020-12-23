@@ -8,6 +8,7 @@ public class SecurityConstants {
     public static String HEADER_STRING = "Authorization";
     public static String SIGNUP_URL = "/users";
     public static String HEADER_NAME = "User ID";
+    public static String H2_CONSOLE = "/h2-console/**";
 
     public static String getTokenSecret() {
         AppProperties appProperties = (AppProperties) SpringApplicationContext.getBean("AppProperties");

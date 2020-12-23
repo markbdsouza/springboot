@@ -32,6 +32,7 @@ public class UserController {
     AddressService addressService;
 
     @GetMapping(produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
     public List<UserRest> getUserList(@RequestParam(value = "page", defaultValue = "1") int page,
                                       @RequestParam(value = "limit", defaultValue = "10") int limit) {
         List<UserRest> returnList = new ArrayList<>();

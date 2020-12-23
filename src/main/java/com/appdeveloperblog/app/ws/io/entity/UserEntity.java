@@ -4,7 +4,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
-@Entity(name="users")
+@Entity
+@Table(name="users")
 public class UserEntity implements Serializable {
 
     private static final long serialVersionUID = -3772691377276902875L;
@@ -107,4 +108,5 @@ public class UserEntity implements Serializable {
     public void setEmailVerificationStatus(boolean emailVerificationStatus) {
         this.emailVerificationStatus = emailVerificationStatus;
     }
+
 }
