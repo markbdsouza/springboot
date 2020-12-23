@@ -7,8 +7,11 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 
 @SpringBootApplication
+@EnableSwagger2
 public class MobileAppWsApplication extends SpringBootServletInitializer
 {
 
@@ -35,4 +38,22 @@ public class MobileAppWsApplication extends SpringBootServletInitializer
 	public AppProperties appProperties(){
 		return new AppProperties();
 	}
+
+//	@Bean
+//	public Docket apiDocket() {
+//		Docket docket = new Docket(DocumentationType.SWAGGER_2)
+//				.select()
+//				.apis(RequestHandlerSelectors.basePackage("com.appdeveloperblog.app.ws"))
+//				.paths(PathSelectors.any())
+//				.build();
+//		return docket;
+//	}
+//
+//	@Bean
+//	public LinkDiscoverers discoverers() {
+//		List<LinkDiscoverer> plugins = new ArrayList<>();
+//		plugins.add(new CollectionJsonLinkDiscoverer());
+//		return new LinkDiscoverers(SimplePluginRegistry.create(plugins));
+//	}
+
 }
