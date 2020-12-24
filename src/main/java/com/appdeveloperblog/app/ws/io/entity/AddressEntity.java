@@ -1,5 +1,7 @@
 package com.appdeveloperblog.app.ws.io.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -25,6 +27,7 @@ public class AddressEntity implements Serializable {
     private String streetName;
     @Column(length=10, nullable = false)
     private String pinCode;
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name="users_id")
     private UserEntity userDetails;
