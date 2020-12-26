@@ -52,20 +52,22 @@ public class UserServiceImpl implements UserService {
             }
 
         }
+        // do a deep copy from userDto to user Entity
         ModelMapper modelMapper = new ModelMapper();
-        //  BeanUtils.copyProperties(user, userEntity);
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
-
+        //generate random user Id and encode the password
         String publicUserId = utils.generateUserId(30);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userEntity.setUserId(publicUserId);
+        // make repo call
         UserEntity storedUserDetails = userRepository.save(userEntity);
+        // create returnValue and do a deep copy
         UserDto storedUser ;
-//        BeanUtils.copyProperties(storedUserDetails, storedUser);
         storedUser = modelMapper.map(storedUserDetails, UserDto.class);
         return storedUser;
     }
 
+    // for Spring Security. ReturnValue is a spring Object that creats a new User. Added by the UserDetailsService interface
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findByEmail(email);
@@ -115,8 +117,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getUserList(int page, int limit) {
         if (page > 0) page = page - 1;
+        // when we have multiple values or a lot of data, we can pass in page and limit
+        // how we fetch is a little different using Pageable and Page Class
         Pageable pageableRequest = PageRequest.of(page, limit);
-
         Page<UserEntity> userEntitiesPages = userRepository.findAll(pageableRequest);
         List<UserEntity> userEntityList = userEntitiesPages.getContent();
         List<UserDto> userDtoList = new ArrayList<>();

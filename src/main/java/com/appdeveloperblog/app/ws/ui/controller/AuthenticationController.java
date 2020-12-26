@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+//Only implemented for Swagger
 @RestController
 public class AuthenticationController {
 
-    //this login is implemented only to trick Springboot to load the swagger config below.
+    // this login is implemented only to trick Springboot to load the swagger config below.
     // but when we actually hit it, it goes to getAuthenticationFilter() in WebSecurity and runs that code
     @ApiOperation("User login")
     @ApiResponses(value = {

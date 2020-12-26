@@ -34,13 +34,14 @@ public class UserController {
     @Autowired
     AddressService addressService;
 
-    //add desc to swaggerj
+    //add desc to swagger ui
     @ApiOperation(value = "get user details web service end point",
             notes = "This web service end point returns user details. Use public user id in the path")
     //Api Implicit Params is for swagger to add authroization as an input field
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "authorization", value="${userController.authorizationHeader.description}", paramType = "header")  )
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header"))
     @GetMapping(produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    // to mention from where we allow cross origins
     @CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
     public List<UserRest> getUserList(@RequestParam(value = "page", defaultValue = "1") int page,
                                       @RequestParam(value = "limit", defaultValue = "10") int limit) {
@@ -54,8 +55,10 @@ public class UserController {
         }
         return returnList;
     }
+
+    //Api Implicit Params is for swagger to add authorization as an input field
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "authorization", value="${userController.authorizationHeader.description}", paramType = "header")  )
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header"))
     @GetMapping(path = "/{id}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public UserRest getUser(@PathVariable String id) {
         UserRest returnValue = new UserRest();
@@ -64,16 +67,19 @@ public class UserController {
         return returnValue;
     }
 
+    //Api Implicit Params is for swagger to add authorization as an input field
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "authorization", value="${userController.authorizationHeader.description}", paramType = "header")  )
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header"))
     @PostMapping(consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws UserServiceException {
-        UserRest returnValue ;
+        UserRest returnValue;
         if (userDetails.getFirstName().isEmpty())
             throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 //        UserDto userDto = new UserDto();
 //        BeanUtils.copyProperties(userDetails, userDto);
+
+        //Model mapper is used to do a DEEP COPY - when we have lists as objects. BeanUtils doesnt do a deep copy.
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
 
@@ -83,8 +89,9 @@ public class UserController {
         return returnValue;
     }
 
+    //Api Implicit Params is for swagger to add authorization as an input field
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "authorization", value="${userController.authorizationHeader.description}", paramType = "header")  )
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header"))
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest updateUser(@PathVariable String id, @RequestBody UserDetailsRequestModel userDetails) {
@@ -96,68 +103,77 @@ public class UserController {
         return returnValue;
     }
 
+    //Api Implicit Params is for swagger to add authorization as an input field
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "authorization", value="${userController.authorizationHeader.description}", paramType = "header")  )
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header"))
     @DeleteMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public OperationStatus deleteUser(@PathVariable String id) {
         OperationStatus returnValue = new OperationStatus();
         returnValue.setOperationName(RequestOperationName.DELETE.name());
         userService.deleteUser(id);
-
         returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
         return returnValue;
     }
 
+    //Api Implicit Params is for swagger to add authorization as an input field
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "authorization", value="${userController.authorizationHeader.description}", paramType = "header")  )
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header"))
     @GetMapping(path = "/{id}/addresses", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public CollectionModel<AddressesRest> getAddresses(@PathVariable String id) {
         List<AddressesRest> returnValue = new ArrayList<>();
+        //core business logic is this one line where we get addresses.
         List<AddressDto> addressDtoList = addressService.getAddresses(id);
-        if(addressDtoList !=null && !addressDtoList.isEmpty()){
+        if (addressDtoList != null && !addressDtoList.isEmpty()) {
             ModelMapper modelMapper = new ModelMapper();
-            Type listType = new TypeToken<List<AddressesRest>>() {}.getType();
+            Type listType = new TypeToken<List<AddressesRest>>() {
+            }.getType();
             returnValue = modelMapper.map(addressDtoList, listType);
-            for(AddressesRest addressesRest: returnValue){
+            for (AddressesRest addressesRest : returnValue) {
+                //creates link for each object in the returnValue List . Loop through each and set the selflink
                 Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
                         .getSingleAddress(id, addressesRest.getAddressId()))
                         .withSelfRel();
                 addressesRest.add(selfLink);
             }
         }
+        // this logic with WebMvcLinkBuilder is only to return additional values ALONG with the actual response for HATEOS Support.
         Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
         Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddresses(id))
                 .withSelfRel();
-        return CollectionModel.of(returnValue, userLink,selfLink);
+        // if we didn't need the extra links, could just do return returnValue;
+        return CollectionModel.of(returnValue, userLink, selfLink);
     }
 
+    //Api Implicit Params is for swagger to add authorization as an input field
     @ApiImplicitParams(
-            @ApiImplicitParam(name = "authorization", value="${userController.authorizationHeader.description}", paramType = "header")  )
+            @ApiImplicitParam(name = "authorization", value = "${userController.authorizationHeader.description}", paramType = "header"))
     @GetMapping(path = "/{id}/addresses/{addressId}", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public AddressesRest getSingleAddress(@PathVariable String id, @PathVariable String addressId){
+    public AddressesRest getSingleAddress(@PathVariable String id, @PathVariable String addressId) {
         AddressesRest addressesRest;
         ModelMapper modelMapper = new ModelMapper();
         AddressDto addressDto = addressService.getAddress(id, addressId);
 
-        addressesRest= modelMapper.map(addressDto, AddressesRest.class);
+        addressesRest = modelMapper.map(addressDto, AddressesRest.class);
         //create links for HATEOS support
         Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
-        Link addressLink =WebMvcLinkBuilder.linkTo(UserController.class)
+        Link addressLink = WebMvcLinkBuilder.linkTo(UserController.class)
                 .slash(id)
                 .slash("addresses")
                 .withRel("addresses");
-        Link addressLink2 =WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddresses(addressId))
+        Link addressLink2 = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddresses(addressId))
                 .withRel("addresses");
         Link selfLink = WebMvcLinkBuilder.linkTo(UserController.class)
                 .slash(id)
                 .slash("addresses")
                 .slash(addressId)
                 .withSelfRel();
+        // can return as an Entity Model as below
+        // return EntityModel.of(addressesRest, Arrays.asList(userLink, addressLink, selfLink));
+
+        // second option
         addressesRest.add(userLink);
         addressesRest.add(addressLink);
         addressesRest.add(selfLink);
-
-        // return EntityModel.of(addressesRest, Arrays.asList(userLink, addressLink, selfLink));
         return addressesRest;
     }
 }

@@ -12,6 +12,8 @@ import java.util.Date;
 @ControllerAdvice
 public class AppExecptionsHandler {
 
+    // returns this ResponseEntity object when a UserServiceException happens.
+    // can specifiy additional headers if required
     @ExceptionHandler(value = {UserServiceException.class})
     public ResponseEntity<Object> handleUserServiceException(UserServiceException ex, WebRequest request)
     {
@@ -19,6 +21,7 @@ public class AppExecptionsHandler {
         return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // for all other exceptions this ResponseEntity is returned
     @ExceptionHandler(value ={Exception.class})
     public ResponseEntity<Object> handleOtherExceptions(Exception ex, WebRequest request)
     {

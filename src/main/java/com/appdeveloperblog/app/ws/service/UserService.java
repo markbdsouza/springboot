@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
+// extends UserDetailsService to get access to the loadByUsername method which is used by Spring security.
 public interface UserService extends UserDetailsService {
     UserDto createUser(UserDto user);
 

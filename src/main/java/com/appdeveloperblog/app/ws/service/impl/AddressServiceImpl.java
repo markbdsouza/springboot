@@ -31,6 +31,7 @@ public class AddressServiceImpl implements AddressService {
         for(AddressEntity entity: addressEntities){
             returnValue.add(modelMapper.map(entity, AddressDto.class));
         }
+
         return returnValue;
     }
 

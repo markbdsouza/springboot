@@ -22,6 +22,7 @@ public class SwaggerConfig {
 
     private Contact contact = new Contact("Mark Dsouza" , "www.markbdsouza.com", "mark.benjamin.dsouza@gmail.com");
     private Collection<VendorExtension> vendorExtentions = new ArrayList<>();
+    //for the header of the Swagger page
     ApiInfo apiInfo = new ApiInfo("Photo App restful webservice" ,
             "This point contains endpoints for the photo app web service",
             "1.0",
@@ -31,6 +32,7 @@ public class SwaggerConfig {
             vendorExtentions
     );
 
+    //creates a Bean for starting up swagger
     @Bean
     public Docket apiDocket() {
         Docket docket = new Docket(DocumentationType.SWAGGER_2)

@@ -17,7 +17,8 @@ import java.util.Arrays;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    private final UserService userDetailsService;//since this implements UserDetailsService. We can instead use UserDetailsService if required.
+    //since this implements UserDetailsService. We can instead use UserDetailsService if required.
+    private final UserService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public WebSecurity(UserService userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
@@ -26,11 +27,15 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     }
 
 
+    // configures the http requests that are allowed. All rules are set up here
     @Override
     public void configure(HttpSecurity http) throws Exception {
+        // getAuthenticationFilter() and new AuthorizationFilter(authenticationManager()) are called here
+        // makes STATELESS here
         http
                 .cors().and()
-                .csrf().disable().authorizeRequests()
+                .csrf().disable()
+                .authorizeRequests()
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGNUP_URL)
                 .permitAll()
                 .antMatchers(SecurityConstants.H2_CONSOLE)
@@ -50,6 +55,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //sets which service has UserDetails/login and what is the password encoder
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
 

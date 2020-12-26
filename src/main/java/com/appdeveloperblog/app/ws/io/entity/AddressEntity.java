@@ -13,10 +13,8 @@ public class AddressEntity implements Serializable {
     @Id
     @GeneratedValue
     private long id;
-
     @Column(length=30, nullable = false)
     private String addressId;
-
     @Column(length=15, nullable = false)
     private String type;
     @Column(length=30, nullable = false)
