@@ -15,6 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class MobileAppWsApplication extends SpringBootServletInitializer
 {
 
+	//created by default for spring app for deploying war
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
 		return builder.sources(MobileAppWsApplication.class);

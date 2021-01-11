@@ -91,12 +91,13 @@ static boolean createdRecords = false ;
         assertEquals(user.isEmailVerificationStatus(), false);
     }
 
-    @Test
-    final void testJPQL(){
-        UserEntity user = userRepository.findUserEntitiyByUserId("asd123");
-        assertNotNull(user);
-        assertEquals(user.getUserId(), "asd123");
-    }
+
+//    @Test
+//    final void testJPQL(){
+//        UserEntity user = userRepository.findUserEntitiyByUserId("asd123");
+//        assertNotNull(user);
+//        assertEquals(user.getUserId(), "asd123");
+//    }
 
     @Test
     final void testUpdateJPQL(){
